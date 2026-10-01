@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Color Combinations — Sunrise Restorations</title>
+  <style>
+    :root {
+      --dark:    #1C2B3A;
+      --navy:    #2E4057;
+      --amber:   #D4782A;
+      --cream:   #F8F4EF;
+      --light:   #EAE4DC;
+      --mid:     #8FA3B1;
+      --divider: #DDD5CA;
+      --green:   #2E7D52;
+      --white:   #FFFFFF;
+      color-scheme: light;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--cream);
+      color: var(--dark);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    header {
+      background: var(--dark);
+      padding: 14px 20px 12px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .header-left { display: flex; align-items: baseline; gap: 10px; }
+    header h1 {
+      font-family: Georgia, serif;
+      font-size: 19px;
+      font-weight: normal;
+      color: white;
+      letter-spacing: -0.01em;
+    }
+    header span {
+      font-size: 11px;
+      color: var(--mid);
+      letter-spacing: 0.06em;
+    }
+    .install-btn {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--amber);
+      background: rgba(212,120,42,0.15);
+      border: 1px solid rgba(212,120,42,0.3);
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 100;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 16px 16px 0 0;
+      width: 100%;
+      max-width: 520px;
+      padding: 24px 24px 36px;
+      max-height: 85dvh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .modal-header h2 {
+      font-family: Georgia, serif;
+      font-size: 20px;
+      font-weight: normal;
+      color: var(--dark);
+    }
+    .modal-close {
+      font-size: 22px;
+      color: var(--mid);
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .install-section { margin-bottom: 22px; }
+    .install-section h3 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--dark);
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--divider);
+    }
+    .install-step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+    .step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--dark);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-text { font-size: 14px; color: var(--dark); line-height: 1.45; }
+    .step-text em { font-style: normal; font-weight: 600; color: var(--amber); }
+    .install-note {
+      font-size: 12px;
+      color: var(--mid);
+      font-style: italic;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--divider);
+      line-height: 1.5;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      background: var(--navy);
+      flex-shrink: 0;
+    }
+    .tab {
+      flex: 1;
+      padding: 10px 0;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      color: var(--mid);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      letter-spacing: 0.03em;
+      user-select: none;
+      transition: color 0.15s;
+    }
+    .tab.active {
+      color: white;
+      border-bottom-color: var(--amber);
+    }
+
+    /* ── Main layout ── */
+    .layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      overflow: hidden;
+    }
+
+    @media (min-width: 640px) {
+      .layout { grid-template-columns: 250px 1fr; }
+    }
+
+    /* ── Left panel (pick list) ── */
+    .pick-panel {
+      background: white;
+      border-right: 1px solid var(--divider);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .pick-panel .panel-head {
+      padding: 10px 16px 9px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--mid);
+      border-bottom: 1px solid var(--divider);
+      background: white;
+      flex-shrink: 0;
+    }
+    .pick-list {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      flex: 1;
+    }
+    .pick-item {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--divider);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14.5px;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      gap: 8px;
+    }
+    .pick-item .pick-left { display: flex; align-items: center; gap: 8px; }
+    .laminate-badge {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 2px 5px;
+      border-radius: 3px;
+      background: #EAE4DC;
+      color: #8FA3B1;
+      flex-shrink: 0;
+    }
+    .pick-item.selected .laminate-badge {
+      background: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.6);
+    }
+    .custom-paint-box {
+      background: var(--cream);
+      border: 1px dashed var(--divider);
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--dark);
+      margin-top: 10px;
+    }
+    .custom-paint-box strong { color: var(--amber); }
+    .pick-item:active { background: var(--cream); }
+    .pick-item.selected {
+      background: var(--dark);
+      color: white;
+    }
+    .pick-item .chevron { color: var(--divider); font-size: 17px; }
+    .pick-item.selected .chevron { color: var(--amber); }
+
+    /* ── Right panel (results) ── */
+    .results-panel {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .results-empty {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 24px;
+      gap: 8px;
+    }
+    .results-empty .prompt {
+      font-family: Georgia, serif;
+      font-size: 18px;
+      color: var(--dark);
+    }
+    .results-empty .hint { font-size: 13px; color: var(--mid); }
+
+    .result-head {
+      background: var(--dark);
+      padding: 14px 20px 12px;
+    }
+    .result-head .eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 3px;
+    }
+    .result-head .name {
+      font-family: Georgia, serif;
+      font-size: 22px;
+      color: white;
+    }
+
+    .section {
+      padding: 14px 20px 16px;
+      border-bottom: 1px solid var(--divider);
+      background: white;
+    }
+    .section + .section { margin-top: 6px; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .section-label.std  { color: var(--green); }
+    .section-label.spl  { color: var(--amber); }
+    .section-label.pnt  { color: var(--mid); }
+    .section-label.hw   { color: var(--dark); }
+
+    .pill-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .pill-badge.c { background: #dff0e8; color: var(--green); }
+    .pill-badge.p { background: #fcecd8; color: var(--amber); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip {
+      font-size: 14px;
+      padding: 7px 13px;
+      border-radius: 4px;
+      border: 1px solid;
+      font-weight: 500;
+    }
+    .chip.std { background: #e8f4ee; border-color: #b0d8c0; color: #1a5c38; }
+    .chip.spl { background: #fdf0e0; border-color: #f0c888; color: #8B4A10; }
+    .chip.pnt { background: var(--light); border-color: var(--divider); color: var(--dark); }
+
+    .hw-grid { display: grid; grid-template-columns: 100px 1fr; gap: 8px 10px; align-items: start; }
+    .hw-key {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--mid);
+      padding-top: 1px;
+    }
+    .hw-val { font-size: 14px; color: var(--dark); }
+    .hw-note { font-size: 11.5px; color: var(--mid); font-style: italic; margin-top: 8px; }
+
+    .section-note {
+      font-size: 11.5px;
+      color: var(--mid);
+      font-style: italic;
+      margin-top: 9px;
+    }
+
+    /* ── Mobile: collapse left panel when result is showing ── */
+    @media (max-width: 639px) {
+      .layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+      .pick-panel { border-right: none; border-bottom: 1px solid var(--divider); }
+      .pick-list { max-height: 200px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Color Combinations</h1>
+    <span>Sunrise Restorations</span>
+  </div>
+  <div class="install-btn" id="install-btn">+ Add to Phone</div>
+</header>
+
+<!-- Install modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add to Your Phone</h2>
+      <div class="modal-close" id="modal-close">✕</div>
+    </div>
+
+    <div class="install-section">
+      <h3>iPhone / iPad</h3>
+      <div class="install-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Open this file in <em>Safari</em> — it won't work from Mail or Chrome for this step</div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Tap the <em>Share button</em> at the bottom of the screen (the box with an arrow pointing up)</div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Scroll down and tap <em>"Add to Home Screen"</em></div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">4</div>
+        <div class="step-text">Tap <em>Add</em> — it appears on your home screen like an app</div>
+      </div>
+    </div>
+
+    <div class="install-section">
+      <h3>Android</h3>
+      <div class="install-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Open this file in <em>Chrome</em></div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Tap the <em>three-dot menu</em> in the top right corner</div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Tap <em>"Add to Home Screen"</em> and confirm</div>
+      </div>
+    </div>
+
+    <div class="install-note">
+      Once added, it opens full-screen like an app and works without an internet connection. If color options ever change, your manager will send an updated file — just repeat these steps to replace it.
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="interior">By Interior</div>
+  <div class="tab" data-tab="exterior">By Exterior</div>
+</div>
+
+<div class="layout">
+  <div class="pick-panel">
+    <div class="panel-head" id="pick-label">Interior Color</div>
+    <div class="pick-list" id="pick-list"></div>
+  </div>
+  <div class="results-panel" id="results-panel">
+    <div class="results-empty">
+      <div class="prompt">Select a color</div>
+      <div class="hint">Available pairings will appear here</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  // interior → { exterior: "C"|"P" }
+  interiors: [
+    "White",
+    "Tan",
+    "Black",
+    "Brazilian Pecan",
+    "Golden Oak",
+    "Provincial Oak",
+    "Colonial Cherry",
+    "English Walnut",
+    "Norwegian Maple",
+    "Raw Pine Paintable/Stainable",
+  ],
+
+  laminates: new Set([
+    "Black","Brazilian Pecan","Provincial Oak",
+    "Colonial Cherry","English Walnut","Norwegian Maple",
+    "Raw Pine Paintable/Stainable"
+  ]),
+
+  exteriors: ["White","Tan","Earthtone","Sandstone","Black"],
+
+  combos: {
+    "White":                        { White:"C", Tan:"C", Earthtone:"C", Sandstone:"C" },
+    "Tan":                          { White:"C", Tan:"C", Earthtone:"P", Sandstone:"P" },
+    "Black":                        { White:"C", Tan:"P", Earthtone:"P", Sandstone:"P" },
+    "Brazilian Pecan":              { White:"C", Tan:"C", Earthtone:"P", Sandstone:"C" },
+    "Golden Oak":                   { White:"C", Tan:"C", Earthtone:"C", Sandstone:"C" },
+    "Provincial Oak":               { White:"C", Tan:"C", Earthtone:"C", Sandstone:"P" },
+    "Colonial Cherry":              { White:"C", Tan:"C", Earthtone:"C", Sandstone:"C" },
+    "English Walnut":               { White:"C", Tan:"C", Earthtone:"P", Sandstone:"P" },
+    "Norwegian Maple":              { White:"C", Tan:"P", Earthtone:"P", Sandstone:"P" },
+    "Raw Pine Paintable/Stainable": { White:"C", Tan:"P", Earthtone:"P", Sandstone:"P" },
+  },
+
+  // Black exterior is paint-only; available with all interiors
+  stockPaints: ["Antique Brown","Black","Royal Brown","Vintage Linen"],
+
+  hardware: {
+    "White":                        { std:"White" },
+    "Tan":                          { std:"Tan" },
+    "Black":                        { std:"Oil-Rubbed Bronze" },
+    "Brazilian Pecan":              { std:"Pontiac Gold" },
+    "Golden Oak":                   { std:"Pontiac Gold" },
+    "Provincial Oak":               { std:"Pontiac Gold" },
+    "Colonial Cherry":              { std:"Pontiac Gold" },
+    "English Walnut":               { std:"Oil-Rubbed Bronze" },
+    "Norwegian Maple":              { std:"Pontiac Gold" },
+    "Raw Pine Paintable/Stainable": { std:"Pontiac Gold" },
+  },
+
+  archHardware: ["Brushed Nickel","Antique Brass","Oil-Rubbed Bronze"],
+};
+
+let mode = "interior"; // "interior" | "exterior"
+let selected = null;
+
+const pickLabel  = document.getElementById("pick-label");
+const pickList   = document.getElementById("pick-list");
+const resultsPanel = document.getElementById("results-panel");
+
+// ── Tabs ──
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => {
+    mode = t.dataset.tab;
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    selected = null;
+    renderList();
+    renderEmpty();
+  });
+});
+
+function renderList() {
+  const items = mode === "interior" ? DATA.interiors : DATA.exteriors;
+  pickLabel.textContent = mode === "interior" ? "Interior Color" : "Exterior Color";
+  pickList.innerHTML = "";
+  items.forEach(name => {
+    const el = document.createElement("div");
+    el.className = "pick-item";
+    el.dataset.name = name;
+    const isLam = mode === "interior" && DATA.laminates.has(name);
+    const isPaintOnly = mode === "exterior" && name === "Black";
+    el.innerHTML = `
+      <span class="pick-left">
+        <span>${name}</span>
+        ${isLam ? `<span class="laminate-badge">LAMINATE</span>` : ""}
+        ${isPaintOnly ? `<span class="laminate-badge">PAINT ONLY</span>` : ""}
+      </span>
+      <span class="chevron">›</span>`;
+    el.addEventListener("click", () => select(name));
+    pickList.appendChild(el);
+  });
+}
+
+function select(name) {
+  selected = name;
+  document.querySelectorAll(".pick-item").forEach(el => {
+    el.classList.toggle("selected", el.dataset.name === name);
+  });
+  renderResults(name);
+  if (window.innerWidth < 640) {
+    resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+function renderEmpty() {
+  resultsPanel.innerHTML = `
+    <div class="results-empty">
+      <div class="prompt">Select a color</div>
+      <div class="hint">Available pairings will appear here</div>
+    </div>`;
+}
+
+function renderResults(name) {
+  let html = "";
+
+  if (mode === "interior") {
+    const c  = DATA.combos[name];
+    const hw = DATA.hardware[name];
+    const isLam = DATA.laminates.has(name);
+    const capstock = Object.entries(c).filter(([,v]) => v === "C").map(([k]) => k);
+    const painted  = Object.entries(c).filter(([,v]) => v === "P").map(([k]) => k);
+
+    html += `
+      <div class="result-head">
+        <div class="eyebrow">Interior Color${isLam ? " &nbsp;·&nbsp; Laminate" : ""}</div>
+        <div class="name">${name}</div>
+      </div>`;
+
+    if (capstock.length) {
+      html += `
+        <div class="section">
+          <div class="section-label std">
+            Standard Exterior <span class="pill-badge c">C — Capstock</span>
+          </div>
+          <div class="chips">
+            ${capstock.map(x => `<div class="chip std">${x}</div>`).join("")}
+          </div>
+        </div>`;
+    }
+
+    if (painted.length) {
+      html += `
+        <div class="section">
+          <div class="section-label spl">
+            Painted Exterior <span class="pill-badge p">P — Painted</span>
+          </div>
+          <div class="chips">
+            ${painted.map(x => `<div class="chip spl">${x}</div>`).join("")}
+          </div>
+        </div>`;
+    }
+
+    html += `
+      <div class="section">
+        <div class="section-label pnt">Exterior Paint Options</div>
+        <div class="chips">
+          ${DATA.stockPaints.map(x => `<div class="chip pnt">${x}</div>`).join("")}
+        </div>
+        <div class="custom-paint-box"><strong>Any exterior color</strong> can be matched via paint — ask for details</div>
+        <div class="section-note">Full screen required on any exterior painted window</div>
+      </div>`;
+
+    html += `
+      <div class="section">
+        <div class="section-label hw">Hardware</div>
+        <div class="hw-grid">
+          <div class="hw-key">Standard</div>
+          <div class="hw-val">${hw.std}</div>
+          <div class="hw-key">Architectural <span style="color:var(--amber);font-size:10px;font-weight:700">+ cost</span></div>
+          <div class="hw-val">${DATA.archHardware.join(" · ")}</div>
+        </div>
+        <div class="hw-note">Architectural finishes available with any color combination</div>
+      </div>`;
+
+  } else {
+    // By exterior
+    const isPaintOnly = name === "Black";
+    const capInteriors = isPaintOnly ? [] : DATA.interiors.filter(i => DATA.combos[i][name] === "C");
+    const pntInteriors = isPaintOnly ? [...DATA.interiors] : DATA.interiors.filter(i => DATA.combos[i][name] === "P");
+
+    html += `
+      <div class="result-head">
+        <div class="eyebrow">Exterior Color${isPaintOnly ? " &nbsp;·&nbsp; Paint Only" : ""}</div>
+        <div class="name">${name}</div>
+      </div>`;
+
+    if (capInteriors.length) {
+      html += `
+        <div class="section">
+          <div class="section-label std">
+            Standard Pairings <span class="pill-badge c">C — Capstock</span>
+          </div>
+          <div class="chips">
+            ${capInteriors.map(x => `<div class="chip std">${x}</div>`).join("")}
+          </div>
+        </div>`;
+    }
+
+    if (pntInteriors.length) {
+      html += `
+        <div class="section">
+          <div class="section-label spl">
+            ${isPaintOnly ? "Available With All Interiors" : "Painted Pairings"} <span class="pill-badge p">P — Painted</span>
+          </div>
+          <div class="chips">
+            ${pntInteriors.map(x => `<div class="chip spl">${x}</div>`).join("")}
+          </div>
+        </div>`;
+    }
+
+    html += `
+      <div class="section">
+        <div class="section-label pnt">Any Exterior Color Available via Paint</div>
+        <div class="custom-paint-box"><strong>Any exterior color</strong> can be matched via paint — ask for details</div>
+        <div class="section-note">Full screen required on any exterior painted window</div>
+      </div>`;
+  }
+
+  resultsPanel.innerHTML = html;
+}
+
+// Init
+renderList();
+renderEmpty();
+
+// Modal
+document.getElementById("install-btn").addEventListener("click", () => {
+  document.getElementById("modal-overlay").classList.add("open");
+});
+document.getElementById("modal-close").addEventListener("click", () => {
+  document.getElementById("modal-overlay").classList.remove("open");
+});
+document.getElementById("modal-overlay").addEventListener("click", (e) => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove("open");
+});
+</script>
+</body>
+</html>
