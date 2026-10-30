@@ -473,8 +473,7 @@
 </div>
 
 <div class="tabs">
-  <div class="tab active" data-tab="interior">By Interior</div>
-  <div class="tab" data-tab="exterior">By Exterior</div>
+  <div class="tab active" data-tab="interior">Start with Interior Color</div>
 </div>
 
 <div class="layout">
@@ -550,7 +549,7 @@ const DATA = {
 
 };
 
-let mode = "interior"; // "interior" | "exterior"
+let mode = "interior";
 let selected = null;
 let selectedSecondary = null;
 
@@ -724,12 +723,6 @@ function renderResults(name) {
         </div>`;
     }
 
-    html += `
-      <div class="section">
-        <div class="section-label pnt">Any Exterior Color Available via Paint</div>
-        <div class="custom-paint-box"><strong>Any exterior color</strong> can be matched via paint — ask for details</div>
-        <div class="section-note">Full <strong>FLEX</strong>SCREEN&#174; required on any exterior painted window</div>
-      </div>`;
   }
 
 
